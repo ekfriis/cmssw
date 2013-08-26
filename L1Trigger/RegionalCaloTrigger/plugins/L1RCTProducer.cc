@@ -1,4 +1,4 @@
-#include "L1Trigger/RegionalCaloTrigger/interface/L1RCTProducer.h" 
+#include "L1Trigger/RegionalCaloTrigger/interface/L1RCTProducer.h"
 
 // RunInfo stuff
 #include "CondFormats/RunInfo/interface/RunInfo.h"
@@ -35,7 +35,7 @@ const int L1RCTProducer::crateFED[18][5]=
 
 
 
-L1RCTProducer::L1RCTProducer(const edm::ParameterSet& conf) : 
+L1RCTProducer::L1RCTProducer(const edm::ParameterSet& conf) :
   rctLookupTables(new L1RCTLookupTables),
   rct(new L1RCT(rctLookupTables)),
   useEcal(conf.getParameter<bool>("useEcal")),
@@ -66,7 +66,7 @@ void L1RCTProducer::beginRun(edm::Run const& run, const edm::EventSetup& eventSe
   //  std::cout << "getFedsFromOmds is " << getFedsFromOmds << std::endl;
 
   updateConfiguration(eventSetup);
-  
+
   int runNumber = run.run();
   updateFedVector(eventSetup,false,runNumber); // RUNINFO ONLY at beginning of run
 
@@ -81,7 +81,7 @@ void L1RCTProducer::beginLuminosityBlock(edm::LuminosityBlock const& lumiSeg,con
     {
       unsigned int nLumi = lumiSeg.luminosityBlock(); // doesn't even need the (unsigned int) cast because LuminosityBlockNumber_t is already an unsigned int
       // LS count starts at 1, want to be able to delay 0 LS's intuitively
-      if ( ( (nLumi - 1) == queryDelayInLS) 
+      if ( ( (nLumi - 1) == queryDelayInLS)
 	   || (queryIntervalInLS > 0 && nLumi % queryIntervalInLS == 0 ) ) // to guard against problems if online DQM crashes; every 100 LS is ~20-30 minutes, not too big a load, hopefully not too long between
 	{
 	  int runNumber = lumiSeg.run();
@@ -93,7 +93,7 @@ void L1RCTProducer::beginLuminosityBlock(edm::LuminosityBlock const& lumiSeg,con
 	  // don't do interval checking... cout message??
 	}
     }
-} 
+}
 
 
 
@@ -119,7 +119,7 @@ void L1RCTProducer::updateConfiguration(const edm::EventSetup& eventSetup)
   edm::ESHandle<L1CaloEcalScale> ecalScale;
   eventSetup.get<L1CaloEcalScaleRcd>().get(ecalScale);
   const L1CaloEcalScale* e = ecalScale.product();
-  
+
   // get energy scale to convert input from HCAL
   edm::ESHandle<L1CaloHcalScale> hcalScale;
   eventSetup.get<L1CaloHcalScaleRcd>().get(hcalScale);
@@ -149,7 +149,7 @@ void L1RCTProducer::updateFedVector(const edm::EventSetup& eventSetup, bool getF
   rctLookupTables->setNoisyChannelMask(cEsNoise);
 
 
-  
+
   //Update the channel mask according to the FED VECTOR
   //This is the beginning of run. We delete the old
   //create the new and set it in the LUTs
@@ -176,7 +176,7 @@ void L1RCTProducer::updateFedVector(const edm::EventSetup& eventSetup, bool getF
 
 
 //   // adding fed mask into channel mask
-  
+
   const std::vector<int> Feds = getFromOmds ? getFedVectorFromOmds(eventSetup) : getFedVectorFromRunInfo(eventSetup); // so can create/initialize/assign const quantity in one line accounting for if statement
   // wikipedia says this is exactly what it's for: http://en.wikipedia.org/wiki/%3F:#C.2B.2B
 
@@ -191,52 +191,52 @@ void L1RCTProducer::updateFedVector(const edm::EventSetup& eventSetup, bool getF
   for(std::vector<int>::const_iterator cf = Feds.begin(); cf != Feds.end(); ++cf)
     {
       int fedNum = *cf;
-      if(fedNum > 600 && fedNum <724) 
+      if(fedNum > 600 && fedNum <724)
 	caloFeds.push_back(fedNum);
     }
 
   for(int  cr = 0; cr < 18; ++cr)
     {
-      
-      for(crateSection cs = c_min; cs <= c_max; cs = crateSection(cs +1)) 
+
+      for(crateSection cs = c_min; cs <= c_max; cs = crateSection(cs +1))
 	{
 	  bool fedFound = false;
-	  
-	  
+
+
 	  //Try to find the FED
 	  std::vector<int>::iterator fv = std::find(caloFeds.begin(),caloFeds.end(),crateFED[cr][cs]);
 	  if(fv!=caloFeds.end())
 	    fedFound = true;
-	  
+
 	  if(!fedFound) {
 	    int eta_min=0;
 	    int eta_max=0;
 	    bool phi_even[2] = {false};//, phi_odd = false;
 	    bool ecal=false;
-	    
+
 	    switch (cs) {
 	    case ebEvenFed :
 	      eta_min = minBarrel;
 	      eta_max = maxBarrel;
 	      phi_even[0] = true;
-	      ecal = true;	
+	      ecal = true;
 	      break;
-	      
+
 	    case ebOddFed:
 	      eta_min = minBarrel;
 	      eta_max = maxBarrel;
 	      phi_even[1] = true;
-	      ecal = true;	
+	      ecal = true;
 	      break;
-	      
+
 	    case eeFed:
 	      eta_min = minEndcap;
 	      eta_max = maxEndcap;
 	      phi_even[0] = true;
 	      phi_even[1] = true;
-	      ecal = true;	
-	      break;	
-	      
+	      ecal = true;
+	      break;
+
 	    case hbheFed:
 	      eta_min = minBarrel;
 	      eta_max = maxEndcap;
@@ -244,24 +244,24 @@ void L1RCTProducer::updateFedVector(const edm::EventSetup& eventSetup, bool getF
 	      phi_even[1] = true;
 	      ecal = false;
 	      break;
-	      
-	    case hfFed:	
+
+	    case hfFed:
 	      eta_min = minHF;
 	      eta_max = maxHF;
-	      
+
 	      phi_even[0] = true;
 	      phi_even[1] = true;
 	      ecal = false;
 	      break;
 	    default:
 	      break;
-	      
+
 	    }
 	    for(int ieta = eta_min; ieta <= eta_max; ++ieta)
 	      {
 		if(ieta<=28) // barrel and endcap
 		  for(int even = 0; even<=1 ; even++)
-		    {	 
+		    {
 		      if(phi_even[even])
 			{
 			  if(ecal)
@@ -274,13 +274,13 @@ void L1RCTProducer::updateFedVector(const edm::EventSetup& eventSetup, bool getF
 		  for(int even = 0; even<=1 ; even++)
 		    if(phi_even[even])
 		      fedUpdatedMask->hfMask[cr][even][ieta-29] = true;
-		
+
 	      }
 	  }
 	}
     }
-  
-  rctLookupTables->setChannelMask(fedUpdatedMask); 
+
+  rctLookupTables->setChannelMask(fedUpdatedMask);
 
 }
 
@@ -316,7 +316,7 @@ const std::vector<int> L1RCTProducer::getFedVectorFromOmds(const edm::EventSetup
     {
       return getFedVectorFromRunInfo(eventSetup);
     }
-  
+
 }
 
 
@@ -324,23 +324,16 @@ const std::vector<int> L1RCTProducer::getFedVectorFromOmds(const edm::EventSetup
 void L1RCTProducer::produce(edm::Event& event, const edm::EventSetup& eventSetup)
 {
 
-
-//  std::cout<<std::endl<<std::endl<<"BEGIN OF THE PRODUCER"<<endl;
-
   std::auto_ptr<L1CaloEmCollection> rctEmCands (new L1CaloEmCollection);
   std::auto_ptr<L1CaloRegionCollection> rctRegions (new L1CaloRegionCollection);
-
 
   if(!(ecalDigis.size()==hcalDigis.size()&&hcalDigis.size()==bunchCrossings.size()))
       throw cms::Exception("BadInput")
 	<< "From what I see the number of your your ECAL input digi collections.\n"
         <<"is different from the size of your HCAL digi input collections\n"
-	<<"or the size of your BX factor collection" 
+	<<"or the size of your BX factor collection"
         <<"They must be the same to correspond to the same Bxs\n"
-	<< "It does not matter if one of them is empty\n"; 
-
-
-
+	<< "It does not matter if one of them is empty\n";
 
   // loop through and process each bx
     for (unsigned short sample = 0; sample < bunchCrossings.size(); sample++)
@@ -350,7 +343,6 @@ void L1RCTProducer::produce(edm::Event& event, const edm::EventSetup& eventSetup
 
 	EcalTrigPrimDigiCollection ecalIn;
 	HcalTrigPrimDigiCollection hcalIn;
-
 
 	if(useHcal&&event.getByLabel(hcalDigis[sample], hcal))
 	  hcalIn = *hcal;
@@ -366,7 +358,7 @@ void L1RCTProducer::produce(edm::Event& event, const edm::EventSetup& eventSetup
 	  {
 	    L1CaloEmCollection isolatedEGObjects = rct->getIsolatedEGObjects(j);
 	    L1CaloEmCollection nonisolatedEGObjects = rct->getNonisolatedEGObjects(j);
-	    for (int i = 0; i<4; i++) 
+	    for (int i = 0; i<4; i++)
 	      {
 		isolatedEGObjects.at(i).setBx(bunchCrossings[sample]);
 		nonisolatedEGObjects.at(i).setBx(bunchCrossings[sample]);
@@ -374,8 +366,8 @@ void L1RCTProducer::produce(edm::Event& event, const edm::EventSetup& eventSetup
 		rctEmCands->push_back(nonisolatedEGObjects.at(i));
 	      }
 	  }
-      
-      
+
+
 	for (int i = 0; i < 18; i++)
 	  {
 	    std::vector<L1CaloRegion> regions = rct->getRegions(i);
@@ -388,11 +380,11 @@ void L1RCTProducer::produce(edm::Event& event, const edm::EventSetup& eventSetup
 
       }
 
-  
+
   //putting stuff back into event
   event.put(rctEmCands);
   event.put(rctRegions);
-  
+
 }
 
 // print contents of (FULL) FED vector

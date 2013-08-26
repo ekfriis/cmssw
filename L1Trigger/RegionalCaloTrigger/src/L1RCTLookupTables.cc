@@ -33,22 +33,22 @@ unsigned int L1RCTLookupTables::lookup(unsigned short ecalInput,
   if(noisyChannelMask_ == 0)
     throw cms::Exception("L1RCTNoisyChannelMask Invalid")
       << "L1RCTNoisyChannelMask should be set every event" << noisyChannelMask_;
-  if(ecalInput > 0xFF) 
-    throw cms::Exception("Invalid Data") 
+  if(ecalInput > 0xFF)
+    throw cms::Exception("Invalid Data")
       << "ECAL compressedET should be less than 0xFF, is " << ecalInput;
-  if(hcalInput > 0xFF) 
-    throw cms::Exception("Invalid Data") 
+  if(hcalInput > 0xFF)
+    throw cms::Exception("Invalid Data")
       << "HCAL compressedET should be less than 0xFF, is " << hcalInput;
-  if(fgbit > 1) 
-    throw cms::Exception("Invalid Data") 
+  if(fgbit > 1)
+    throw cms::Exception("Invalid Data")
       << "ECAL finegrain should be a single bit, is " << fgbit;
   short iEta = (short) rctParameters_->calcIEta(crtNo, crdNo, twrNo);
   unsigned short iAbsEta = (unsigned short) abs(iEta);
   short sign = iEta/iAbsEta;
   unsigned short iPhi = rctParameters_->calcIPhi(crtNo, crdNo, twrNo);
   unsigned short phiSide = (iPhi/4)%2;
-  if(iAbsEta < 1 || iAbsEta > 28) 
-    throw cms::Exception("Invalid Data") 
+  if(iAbsEta < 1 || iAbsEta > 28)
+    throw cms::Exception("Invalid Data")
       << "1 <= |IEta| <= 28, is " << iAbsEta;
 
 
@@ -58,11 +58,11 @@ unsigned int L1RCTLookupTables::lookup(unsigned short ecalInput,
 
 
   // using channel mask to mask off ecal channels
-  //Mike: Introducing the hot channel mask 
+  //Mike: Introducing the hot channel mask
   //If the Et is above the threshold then mask it as well
 
 
-  
+
   float ecalBeforeMask = convertEcal(ecalInput, iAbsEta, sign);
 
 
@@ -70,8 +70,8 @@ unsigned int L1RCTLookupTables::lookup(unsigned short ecalInput,
     (noisyChannelMask_->ecalMask[crtNo][phiSide][iAbsEta-1] &&
      ecalBeforeMask<noisyChannelMask_->ecalThreshold)||//hot mask
       (rctParameters_->eGammaECalScaleFactors()[iAbsEta-1] == 0.&&
-       rctParameters_->jetMETECalScaleFactors()[iAbsEta-1] == 0.);       
-    
+       rctParameters_->jetMETECalScaleFactors()[iAbsEta-1] == 0.);
+
 
 
   if (resetECAL)    {
@@ -119,8 +119,8 @@ unsigned int L1RCTLookupTables::lookup(unsigned short ecalInput,
       etIn9Bits = jetMETETCode(ecal, hcal, iAbsEta);
     }
   // Saturated input towers cause tower ET pegging at the highest value
-  if((ecalAfterMask == 0xFF && 
-      rctParameters_->eGammaECalScaleFactors()[iAbsEta-1] != 0. ) 
+  if((ecalAfterMask == 0xFF &&
+      rctParameters_->eGammaECalScaleFactors()[iAbsEta-1] != 0. )
      || (hcalAfterMask == 0xFF &&
 	 rctParameters_->eGammaHCalScaleFactors()[iAbsEta-1] != 0. )
      )
@@ -171,15 +171,15 @@ unsigned int L1RCTLookupTables::lookup(unsigned short hfInput,
   if(channelMask_ == 0)
     throw cms::Exception("L1RCTChannelMask Invalid")
       << "L1RCTChannelMask should be set every event" << channelMask_;
-  if(hfInput > 0xFF) 
-    throw cms::Exception("Invalid Data") 
+  if(hfInput > 0xFF)
+    throw cms::Exception("Invalid Data")
       << "HF compressedET should be less than 0xFF, is " << hfInput;
   short iEta = rctParameters_->calcIEta(crtNo, crdNo, twrNo);
   unsigned short iAbsEta = abs(iEta);
   short sign = (iEta/iAbsEta);
   unsigned short phiSide = twrNo/4;
-  if(iAbsEta < 29 || iAbsEta > 32) 
-    throw cms::Exception("Invalid Data") 
+  if(iAbsEta < 29 || iAbsEta > 32)
+    throw cms::Exception("Invalid Data")
       << "29 <= |iEta| <= 32, is " << iAbsEta;
 
   float et = convertHcal(hfInput, iAbsEta, sign);;
@@ -203,12 +203,12 @@ bool L1RCTLookupTables::hOeFGVetoBit(float ecal, float hcal, bool fgbit) const
     throw cms::Exception("L1RCTParameters Invalid")
       << "L1RCTParameters should be set every event" << rctParameters_;
   bool veto = false;
-  if(ecal > rctParameters_->eMinForFGCut() && 
+  if(ecal > rctParameters_->eMinForFGCut() &&
      ecal < rctParameters_->eMaxForFGCut())
     {
       if(fgbit) veto = true;
     }
-  if(ecal >= rctParameters_->eMinForHoECut() && 
+  if(ecal >= rctParameters_->eMinForHoECut() &&
      ecal < rctParameters_->eMaxForHoECut())
     {
       if((hcal / ecal) > rctParameters_->hOeCut()) veto = true;
@@ -230,41 +230,30 @@ bool L1RCTLookupTables::activityBit(float ecal, float hcal, bool fgbit) const
   bool aBit = false;
   if(rctParameters_->eMinForHoECut() < rctParameters_->eMaxForHoECut()) {
     // For RCT operations HoE cut and tauVeto are used
-    aBit = ((ecal > rctParameters_->eActivityCut()) || 
+    aBit = ((ecal > rctParameters_->eActivityCut()) ||
 	    (hcal > rctParameters_->hActivityCut()));
   }
   else {
-    // We redefine tauVeto() for upgrade as EM activity only  -- 
+    // We redefine tauVeto() for upgrade as EM activity only  --
     // both EG and Tau make it through the EIC and JSC to CTP cards
     // In the CTP card we want to rechannel EG/Tau candidates to EG and Tau
-
-//    if(ecal > rctParameters_->eActivityCut()) {
-//      if((hcal/ecal) < rctParameters_->hOeCut()) {
-//     if(fgbit ||  ((ecal+hcal)>(rctParameters_->eActivityCut()+rctParameters_->hActivityCut())&&hcal/(ecal+hcal)>rctParameters_->hOeCut()) || ((ecal+hcal)<(rctParameters_->eActivityCut()+rctParameters_->hActivityCut()) && hcal > rctParameters_->hActivityCut())){
-	
-	if(fgbit ||  ((ecal)>(rctParameters_->eActivityCut())&&hcal/(ecal+hcal)>rctParameters_->hOeCut()) || ((ecal)<=(rctParameters_->eActivityCut()) && hcal > rctParameters_->hActivityCut())){
-	aBit = true;
-//      }
-      }
-/*   if( (ecal+hcal)>0){
-      if(aBit) std::cout<<"LUT ACTIVITY VETO  ----------> ECAL= "<<ecal<<"  HCAL="<<hcal<<"   HoE= "<<hcal/ecal<<std::endl;	
-//      else if( (ecal+hcal)>2) std::cout<<"LUT ACTIVITY VETO  ---------->     Failed!!!     ECAL="<<ecal<<"  HCAL="<<hcal<<"   HoE= "<<hcal/ecal<<std::endl;
+    if(fgbit ||  ((ecal)>(rctParameters_->eActivityCut())&&hcal/(ecal+hcal)>rctParameters_->hOeCut()) || ((ecal)<=(rctParameters_->eActivityCut()) && hcal > rctParameters_->hActivityCut())){
+      aBit = true;
     }
-*/
   }
 
   return aBit;
 }
 
 // uses etScale
-unsigned int L1RCTLookupTables::emRank(unsigned short energy) const 
+unsigned int L1RCTLookupTables::emRank(unsigned short energy) const
 {
   if(etScale_)
     {
       return etScale_->rank(energy);
     }
   else
-    //    edm::LogInfo("L1RegionalCaloTrigger") 
+    //    edm::LogInfo("L1RegionalCaloTrigger")
     //      << "CaloEtScale was not used - energy instead of rank" << std::endl;
   return energy;
 }
@@ -274,14 +263,14 @@ float L1RCTLookupTables::convertEcal(unsigned short ecal, unsigned short iAbsEta
 {
   if(ecalScale_)
     {
-      //std::cout << "[luts] energy " << ecal << " sign " << sign 
+      //std::cout << "[luts] energy " << ecal << " sign " << sign
       //<< " iAbsEta " << iAbsEta << " iPhi "	<< iPhi << std::endl;
       float dummy = 0;
       dummy = float (ecalScale_->et( ecal, iAbsEta, sign ));
       /*
       if (ecal > 0)
 	{
-	  std::cout << "[luts] ecal converted from " << ecal << " to " 
+	  std::cout << "[luts] ecal converted from " << ecal << " to "
 		    << dummy << " with iAbsEta " << iAbsEta << std::endl;
 	}
       */
@@ -307,15 +296,15 @@ float L1RCTLookupTables::convertHcal(unsigned short hcal, unsigned short iAbsEta
     }
   else
     {
-      //      edm::LogInfo("L1RegionalCaloTrigger") 
+      //      edm::LogInfo("L1RegionalCaloTrigger")
       //	<< "CaloTPGTranscoder was not used" << std::endl;
       return ((float) hcal) * rctParameters_->jetMETLSB();
     }
 }
 
 // integerize given an LSB and set maximum value of 2^precision-1
-unsigned long L1RCTLookupTables::convertToInteger(float et, 
-						  float lsb, 
+unsigned long L1RCTLookupTables::convertToInteger(float et,
+						  float lsb,
 						  int precision) const
 {
   unsigned long etBits = (unsigned long)(et/lsb);

@@ -1,5 +1,5 @@
 #include "L1Trigger/RegionalCaloTrigger/interface/L1RCTJetSummaryCard.h"
-#include "L1Trigger/RegionalCaloTrigger/interface/L1RCTLookupTables.h" 
+#include "L1Trigger/RegionalCaloTrigger/interface/L1RCTLookupTables.h"
 #include "CondFormats/L1TObjects/interface/L1RCTParameters.h"
 
 #include <iostream>
@@ -10,7 +10,7 @@ using std::vector;
 #include <bitset>
 using std::bitset;
 
-L1RCTJetSummaryCard::L1RCTJetSummaryCard(int crtNo, const L1RCTLookupTables* rctLookupTables) : 
+L1RCTJetSummaryCard::L1RCTJetSummaryCard(int crtNo, const L1RCTLookupTables* rctLookupTables) :
   crtNo(crtNo),
   rctLookupTables_(rctLookupTables),
   isolatedEGObjects(4),
@@ -68,7 +68,7 @@ void L1RCTJetSummaryCard::fillJetRegions(){
     jetRegions.at(4) = barrelRegions.at(8);
     jetRegions.at(5) = barrelRegions.at(9);
     jetRegions.at(6) = barrelRegions.at(12);
-    
+
     jetRegions.at(11) = barrelRegions.at(2);
     jetRegions.at(12) = barrelRegions.at(3);
     jetRegions.at(13) = barrelRegions.at(6);
@@ -176,11 +176,8 @@ void L1RCTJetSummaryCard::fillTauBits(const std::vector<unsigned short>& tau){
   bitset<14> taus;
   for(int i = 0; i<14; i++){
     taus[i] = tau.at(i);
-//    std::cout<<"L1RCTJetSummaryCard:  "<<taus[i];
   }
-
   tauBits = taus.to_ulong();
-
 }
 
 void L1RCTJetSummaryCard::fillOverFlowBits(const std::vector<unsigned short>& overflow){
